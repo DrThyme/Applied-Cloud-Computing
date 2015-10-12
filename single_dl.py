@@ -13,14 +13,16 @@ config = {'user':os.environ['OS_USERNAME'],
 conn = swiftclient.client.Connection(auth_version=2, **config)
 app = Celery('tasks', backend='amqp', broker='amqp://')
 
-nr_of_tweets = 0
-count_hon = 0
-count_han = 0
-count_den = 0
-count_det = 0
-count_denna = 0
-count_denne = 0
-count_hen = 0
+counts = {
+	'nr_of_tweets': 0,
+	'count_hon': 0,
+	'count_han':  0,
+	'count_den': 0,
+	'count_det': 0,
+	'count_denna': 0,
+	'count_denne': 0,
+	'count_hen': 0
+}
 
 (response, object_list) = conn.get_container("tweets")
 
@@ -32,23 +34,25 @@ def countTweets(object_list):
 		split_str = filter(None,split_str)
 		for item in split_str:
 			json_temp = json.loads(item)
-			nr_of_tweets += 1
+			counts['nr_of_tweets'] += 1
 			check = json_temp['text'].lower()
-			count_hon += check.count('hon')
-			count_han += check.count('han')
-			count_den += check.count('den')
-			count_det += check.count('det')
-			count_denna += check.count('denna')
-			count_denne += check.count('denne')
-			count_hen += check.count('hen')
+			counts['count_hon'] += check.count('hon')
+			counts['count_han'] += check.count('han')
+			counts['count_den'] += check.count('den')
+			counts['count_det'] += check.count('det')
+			counts['count_denna'] += check.count('denna')
+			counts['count_denne'] += check.count('denne')
+			counts['count_hen'] += check.count('hen')
 		print("Object {} done!".format(object['name']))
-	print("{}{}".format("Number of tweets: ", nr_of_tweets))
-	print("{}{}".format("Number of 'hon': ", count_hon))
-	print("{}{}".format("Number of 'han': ", count_han))
-	print("{}{}".format("Number of 'den': ", count_den))
-	print("{}{}".format("Number of 'det': ", count_det))
-	print("{}{}".format("Number of 'denna': ", count_denna))
-	print("{}{}".format("Number of 'denne': ", count_denne))
-	print("{}{}".format("Number of 'hen': ", count_hen))
+	#print("{}{}".format("Number of tweets: ", nr_of_tweets))
+	#print("{}{}".format("Number of 'hon': ", count_hon))
+	#print("{}{}".format("Number of 'han': ", count_han))
+	#print("{}{}".format("Number of 'den': ", count_den))
+	#print("{}{}".format("Number of 'det': ", count_det))
+	#print("{}{}".format("Number of 'denna': ", count_denna))
+	#print("{}{}".format("Number of 'denne': ", count_denne))
+	#print("{}{}".format("Number of 'hen': ", count_hen))
+	
+	print(counts)
 
-
+countTweets(object_list)
