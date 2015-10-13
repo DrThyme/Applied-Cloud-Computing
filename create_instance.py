@@ -1,3 +1,4 @@
+#!/usr/bin/python2
 from novaclient.client import Client
 
 config = {'user':os.environ['OS_USERNAME'], 
