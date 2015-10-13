@@ -1,0 +1,15 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+ - git
+ - rabbitmq-server
+ - pip
+ - python-swiftclient
+ - python-virtualenv
+
+runcmd:
+ - pip install Celery
+ - pip install Flask
