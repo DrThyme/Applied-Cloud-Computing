@@ -41,6 +41,7 @@ user_data.close()
 status = instance.status
 while status == 'BUILD':
 	time.sleep(3)
+	instance = nc.servers.get(instance.id)
 	status = instance.status
 print "Battlestation operational!"
 
@@ -49,15 +50,15 @@ Attach floating ip to the instance.
 """
 try:
 	fip_set = 0
-	fip_list = self.nova.floating_ips.list()
+	fip_list = nc.floating_ips.list()
 	for fip in fip_list:
-		check_ip = self.nova.floating_ips.get(fip)
+		check_ip = nc.floating_ips.get(fip)
 		if check_ip.fixed_ip == None:
 			floating_ip = check_ip
 			fip_set = 1
 			break
 	if fip_set == 0:
-		floating_ip = self.nova.floating_ips.create(self.config['floating_ip_pool'])
+		floating_ip = nc.floating_ips.create(self.config['floating_ip_pool'])
 	instance.add_floating_ip(floating_ip)
 	print "thymeworks_main can be found at", floating_ip.ip 
 except Exception as e:

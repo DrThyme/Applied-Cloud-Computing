@@ -6,10 +6,12 @@ package_upgrade: true
 packages:
  - git
  - rabbitmq-server
- - pip
+ - python-pip
  - python-swiftclient
- - python-virtualenv
 
 runcmd:
  - pip install Celery
  - pip install Flask
+ - pip install python-swiftclient
+ - git clone https://github.com/DrThyme/Applied-Cloud-Computing.git
+ - chmod -R 777 /home/ubuntu/Applied-Cloud-Computing
