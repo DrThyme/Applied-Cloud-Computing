@@ -1,30 +1,42 @@
-#!/usr/bin/python
 import os
+import sys
+import time
 from novaclient.client import Client
+import paramiko
 
-config = {'user':os.environ['OS_USERNAME'], 
-          'key':os.environ['OS_PASSWORD'],
-          'tenant_name':os.environ['OS_TENANT_NAME'],
-          'authurl':os.environ['OS_AUTH_URL']}
+PRIV_KEY_PATH = '/home/thyme/Downloads/cloud.key'
+PUB_KEY_PATH = '/home/thyme/Downloads/cloud.key.pub'
+
+img_name = 'MOLNS_OpenStack_accpro4_1444644885'
+
+
+config = {'username':os.environ['OS_USERNAME'], 
+          'api_key':os.environ['OS_PASSWORD'],
+          'project_id':os.environ['OS_TENANT_NAME'],
+          'auth_url':os.environ['OS_AUTH_URL']}
 
 nc = Client('2',**config)
+
+if not nc.keypairs.findall(name='master_key'):
+    with open(os.path.expanduser(PUB_KEY_PATH)) as fpubkey:
+        nc.keypairs.create(name='master_key', public_key=fpubkey.read())
+image = nc.images.find(name=img_name)
+flavor = nc.flavors.find(name='m1.medium')
+
 
 """
 Create the instance.
 """
-image = nc.images.find(name='Ubuntu Server 14.04 LTS (Trusty Tahr)')
-flavor = nc.flavors.find(name='m1.medium')
 network = nc.networks.find(label='ext-net')
 user_data = open('/home/thyme/School/Applied-Cloud-Computing/user_data.yml','r')
-keypair = nc.keypairs.get('thymeworks_access2')
-isntance = nc.servers.create(name='thymeworks_main',
-                            image = image.id,
-                            flavor = flavor.id,
-                            network = network.id,
-                            key_name = keypair.name,
+instance = nc.servers.create(name='thymeworks_main',
+                            image = image,
+                            flavor = flavor,
+                            network = network,
+                            key_name = 'master_key',
                             userdata = user_data) 
 
-userdata.close()
+user_data.close()
 
 status = instance.status
 while status == 'BUILD':
