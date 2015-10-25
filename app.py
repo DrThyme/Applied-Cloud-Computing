@@ -1,10 +1,12 @@
 from celery import Celery, group, subtask
 from pprint import pprint
 from flask import Flask, jsonify
+from collections import Counter
 import sys
 import time
 import json
 import os
+import re
 import swiftclient.client
 
 app = Flask(__name__)
@@ -28,22 +30,25 @@ def workerCount(tweets):
 		'det': 0,
 		'denna': 0,
 		'denne': 0,
-		'hen': 01
+		'hen': 0
 	}
+	vocab = ['hon', 'han', 'den', 'det', 'denna', 'denne', 'hen']
+	r = re.compile("|".join(r"\b%s\b" % w for w in vocab))
 	split_tweets = tweets.split('\n')
 	split_tweets = filter(None,split_tweets)
 	for tweet in split_tweets:
 		json_temp = json.loads(tweet)
-		if not json_temp['retweeted']:
+		if not 'retweeted_status' in json_temp:
 			count['#tweets'] += 1 
-			check = json_temp['text'].lower() 
-			count['hon'] += check.count('hon') 
-			count['han'] += check.count('han') 
-			count['den'] += check.count('den') 
-			count['det'] += check.count('det') 
-			count['denna'] += check.count('denna') 
-			count['denne'] += check.count('denne') 
-			count['hen'] += check.count('hen')
+			check = json_temp['text'].lower()
+			wordcount = Counter(re.findall(r,check)) 
+			count['hon'] += wordcount['hon'] 
+			count['han'] += wordcount['han'] 
+			count['den'] += wordcount['den'] 
+			count['det'] += wordcount['det'] 
+			count['denna'] += wordcount['denna'] 
+			count['denne'] += wordcount['denne'] 
+			count['hen'] += wordcount['hen']
 	return(count)
 
 def sum_counts(master,results):
@@ -72,6 +77,7 @@ def display_info():
 
 @app.route('/run', methods=['GET'])
 def allocate_tasks():
+	print "APPLICATION INITIATED!"
 	master_count = {
 		'#tweets': 0,
 		'hon': 0,
