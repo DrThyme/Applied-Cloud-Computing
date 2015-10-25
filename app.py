@@ -1,5 +1,7 @@
 from celery import Celery
 from pprint import pprint
+from flask import Flask, jsonify
+import time
 import json
 import os
 import swiftclient.client
@@ -32,15 +34,14 @@ def workerCount(tweets):
 		json_temp = json.load(item)
 		if not json_temp['retweeted']:
 			master_count['nr_of_tweets'] += 1 
-            check = json_temp['text'].lower() 
-            master_count['count_hon'] += check.count('hon') 
-            master_count['count_han'] += check.count('han') 
-            master_count['count_den'] += check.count('den') 
-            master_count['count_det'] += check.count('det') 
-            master_count['count_denna'] += check.count('denna') 
-            master_count['count_denne'] += check.count('denne') 
-            master_count['count_hen'] += check.count('hen')
-	
+			check = json_temp['text'].lower() 
+			master_count['count_hon'] += check.count('hon') 
+			master_count['count_han'] += check.count('han') 
+			master_count['count_den'] += check.count('den') 
+			master_count['count_det'] += check.count('det') 
+			master_count['count_denna'] += check.count('denna') 
+			master_count['count_denne'] += check.count('denne') 
+			master_count['count_hen'] += check.count('hen')
 
 def countTweets(object_list):
 	for object in object_list:
@@ -74,10 +75,22 @@ def display_info():
 
 @app.route('/run', methods['GET'])
 def allocate_tasks():
-	
+	master_count = dict.fromkeys(master_count.iterkeys(),0)
 	(response, obj_list) = conn.get_container('tweets')
 	object_name_list = []
 	for object in obj_list:
 		object_name_list.append(object['name'])
 
-	tasks = 
+	tasks = [check_tweet.s(object_name) for object_name in object_name_list]
+	t_group = group(tasks)
+	results = t_group()
+
+	while not results.ready():
+		time.wait(4)
+		print "Wait for it!"
+
+	print "ALL IS WELL!"
+	return jsonify(master_count)
+
+if __name__ == '__main__':
+	app.run(host='0.0.0.0',debug=true)
