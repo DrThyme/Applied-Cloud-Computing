@@ -29,7 +29,7 @@ Create the instance.
 """
 network = nc.networks.find(label='ext-net')
 user_data = open('/home/thyme/School/Applied-Cloud-Computing/user_data.yml','r')
-instance = nc.servers.create(name='thymeworks_main',
+instance = nc.servers.create(name='thymeworks',
                             image = image,
                             flavor = flavor,
                             network = network,
